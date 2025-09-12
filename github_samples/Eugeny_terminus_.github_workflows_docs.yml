@@ -1,0 +1,34 @@
+name: Docs
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    if: ${{ github.actor != 'dependabot[bot]' }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.3.4
+      with:
+        fetch-depth: 0
+
+    - name: Installing Node
+      uses: actions/setup-node@v2.1.5
+      with:
+        node-version: 14
+
+    - name: Build
+      run: |
+        eval $(ssh-agent -s)
+        ssh-add <(echo "$DOCS_PRIVATE_KEY")
+        yarn cache clean
+        cd app
+        yarn
+        cd ..
+        rm app/node_modules/.yarn-integrity
+        yarn
+        yarn run build:typings
+        yarn run docs
+        rsync -e "ssh -o StrictHostKeyChecking=no" -arv docs/api/ root@ajenti.org:/srv/terminus-docs/
+
+      env:
+        DOCS_PRIVATE_KEY: ${{ secrets.DOCS_PRIVATE_KEY }}
