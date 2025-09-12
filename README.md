@@ -12,6 +12,7 @@ The following tools can be used to scan the code in this repository:
 - Bandit
 - safety
 - shellcheck
+- actionlint
 
 The following tools will be supported in the future, we will be adding additional files for them:
 - eslint
